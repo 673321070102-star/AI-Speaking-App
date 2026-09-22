@@ -197,7 +197,7 @@
     .audio-play-btn:active { transform: scale(0.95); background: var(--primary-accent); }
 
     .translation-sub {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: var(--text-sub);
       margin-top: 5px;
       padding: 0 4px;
@@ -246,34 +246,9 @@
       border-radius: 8px;
     }
 
-    /* Wave recording visualizer */
-    .recording-wave {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 8px;
-      background: rgba(220, 38, 38, 0.15);
-      border-radius: 20px;
-      margin: 0 16px 8px;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .wave-bar {
-      width: 3px;
-      height: 12px;
-      background: #EF4444;
-      border-radius: 3px;
-      animation: wave 1s infinite ease-in-out;
-    }
-
-    .wave-bar:nth-child(2) { animation-delay: 0.2s; }
-    .wave-bar:nth-child(3) { animation-delay: 0.4s; }
-    .wave-bar:nth-child(4) { animation-delay: 0.1s; }
-
     /* Bottom Input Control Bar */
     .input-bar {
-      padding: 12px 16px 20px;
+      padding: 14px 16px 20px;
       background: rgba(15, 23, 42, 0.95);
       border-top: 1px solid var(--card-border);
       display: flex;
@@ -286,7 +261,7 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--card-border);
       border-radius: 25px;
-      padding: 6px 16px;
+      padding: 8px 18px;
       display: flex;
       align-items: center;
     }
@@ -297,52 +272,32 @@
       border: none;
       outline: none;
       color: white;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
     }
 
     .text-input::placeholder { color: var(--text-sub); }
 
-    .mic-btn {
-      width: 48px;
-      height: 48px;
+    .send-btn {
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
       border: none;
       color: white;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       box-shadow: 0 0 15px var(--glow-color);
       flex-shrink: 0;
-      transition: all 0.2s ease;
+      transition: transform 0.15s ease;
     }
 
-    .mic-btn.recording {
-      background: linear-gradient(135deg, #EF4444, #DC2626);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-      animation: pulseMic 1.2s infinite;
-    }
-
-    .send-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid var(--card-border);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
+    .send-btn:active { transform: scale(0.92); }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulseMic { 0%{ transform: scale(1); } 50%{ transform: scale(1.08); } 100%{ transform: scale(1); } }
-    @keyframes wave { 0%, 100% { height: 6px; } 50% { height: 18px; } }
   </style>
 </head>
 <body>
@@ -352,10 +307,10 @@
   <!-- Top Bar -->
   <header class="top-bar">
     <div class="brand-title">
-      <div class="brand-icon"><i class="fa-solid fa-headset"></i></div>
+      <div class="brand-icon"><i class="fa-solid fa-robot"></i></div>
       <div class="brand-text">
         <h1>AI Speaking Pro</h1>
-        <p><span class="online-dot"></span> พร้อมโต้ตอบ Real-time</p>
+        <p><span class="online-dot"></span> แปลและโต้ตอบอัตโนมัติ</p>
       </div>
     </div>
     <div class="score-badge" id="scoreBadge"><i class="fa-solid fa-star" style="color:#F59E0B;"></i> <span>--</span></div>
@@ -374,10 +329,10 @@
   <main class="chat-body" id="chatBody">
     <div class="chat-row ai">
       <div class="bubble-wrapper">
-        <div class="bubble">Hello! Ready to practice english with me?</div>
-        <button class="audio-play-btn" onclick="speakText('Hello! Ready to practice english with me?')"><i class="fa-solid fa-volume-high"></i></button>
+        <div class="bubble">Hello! Ready to practice English with me? You can type in English or Thai.</div>
+        <button class="audio-play-btn" onclick="speakText('Hello! Ready to practice English with me? You can type in English or Thai.')"><i class="fa-solid fa-volume-high"></i></button>
       </div>
-      <div class="translation-sub">สวัสดีครับ! พร้อมฝึกภาษาอังกฤษกับผมหรือยังครับ?</div>
+      <div class="translation-sub">สวัสดีครับ! พร้อมฝึกภาษาอังกฤษหรือยังครับ? พิมพ์ได้ทั้งภาษาไทยและอังกฤษเลยนะครับ</div>
     </div>
   </main>
 
@@ -392,21 +347,12 @@
     </div>
   </section>
 
-  <!-- Recording Visualizer Wave -->
-  <div class="recording-wave" id="recordingWave">
-    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-    <span style="font-size: 0.75rem; color: #EF4444; margin-left: 6px; font-weight: 600;">กำลังฟังเสียงพูดของคุณ...</span>
-  </div>
-
   <!-- Bottom Control Input Bar -->
   <div class="input-bar">
-    <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="แตะเพื่อพูด">
-      <i class="fa-solid fa-microphone"></i>
-    </button>
     <div class="input-box-wrapper">
-      <input type="text" id="userInput" class="text-input" placeholder="พิมพ์ข้อความ หรือกดไมค์..." onkeypress="if(event.key==='Enter') handleSend()">
+      <input type="text" id="userInput" class="text-input" placeholder="พิมพ์ภาษาไทย หรือ English ที่นี่..." onkeypress="if(event.key==='Enter') handleSend()">
     </div>
-    <button class="send-btn" onclick="handleSend()">
+    <button class="send-btn" onclick="handleSend()" title="ส่งข้อความ">
       <i class="fa-solid fa-paper-plane"></i>
     </button>
   </div>
@@ -414,44 +360,14 @@
 </div>
 
 <script>
-  https://script.google.com/macros/s/AKfycbzYr2ENkdCRQnoefg8QlAVjDaPMh7eFJmnautE3jCEPyeV2cJ_ATEL5KjK_7RiaTBeh/exec
+  https://script.google.com/macros/s/AKfycbysXIOmlXYGPrh1l8SGg-2y5p0JSh5yKNrmt1nOYHDX590cm8BtdBKCXvSQrcUIMdL_/exec
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbymLPSETMSlqdQxbjR34vew3z7FX6pkti9uPIuuksduKTw0MZP0W6l6--WNI8ZMQv_0/exec";
+
   let currentScenario = '🍔 สั่งอาหาร';
-  let recognition = null;
-  let isRecording = false;
 
-  window.addEventListener('DOMContentLoaded', () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      recognition.onstart = () => {
-        isRecording = true;
-        document.getElementById('micBtn').classList.add('recording');
-        document.getElementById('recordingWave').style.display = 'flex';
-      };
-
-      recognition.onresult = (event) => {
-        document.getElementById('userInput').value = event.results[0][0].transcript;
-        handleSend();
-      };
-
-      recognition.onend = recognition.onerror = () => {
-        isRecording = false;
-        document.getElementById('micBtn').classList.remove('recording');
-        document.getElementById('recordingWave').style.display = 'none';
-      };
-    }
-  });
-
-  function toggleMic() {
-    if (!recognition) {
-      alert("เบราว์เซอร์ไม่รองรับไมค์ แนะนำให้เปิดด้วย Chrome หรือ Safari ครับ");
-      return;
-    }
-    isRecording ? recognition.stop() : recognition.start();
+  function isThaiText(text) {
+    const thaiRegex = /[\u0E00-\u0E7F]/;
+    return thaiRegex.test(text);
   }
 
   function selectScenario(name, element) {
@@ -480,7 +396,7 @@
     }
   }
 
-  function handleSend() {
+  async function handleSend() {
     const inputEl = document.getElementById('userInput');
     const text = inputEl.value.trim();
     if (!text) return;
@@ -489,25 +405,33 @@
     inputEl.value = '';
     appendLoadingMsg();
 
-    google.script.run
-      .withSuccessHandler(renderAIResponse)
-      .withFailureHandler((err) => {
-        removeLoadingMsg();
-        alert("การเชื่อมต่อล้มเหลว: " + err);
-      })
-      .processMessage(currentScenario, text);
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ scenario: currentScenario, message: text })
+      });
+      
+      const data = await response.json();
+      renderAIResponse(data);
+    } catch (err) {
+      removeLoadingMsg();
+      alert("การเชื่อมต่อล้มเหลว ตรวจสอบ Web App URL อีกครั้งครับ: " + err);
+    }
   }
 
   function appendUserMsg(text) {
     const chatBody = document.getElementById('chatBody');
-    const safeText = text.replace(/'/g, "\\'");
+    const isThai = isThaiText(text);
+    const subText = isThai ? "กำลังแปลเป็นภาษาอังกฤษ..." : "กำลังแปลเป็นภาษาไทย...";
+
     chatBody.insertAdjacentHTML('beforeend', `
       <div class="chat-row user">
         <div class="bubble-wrapper">
           <div class="bubble">${text}</div>
-          <button class="audio-play-btn" onclick="speakText('${safeText}')"><i class="fa-solid fa-volume-high"></i></button>
+          ${!isThai ? `<button class="audio-play-btn" onclick="speakText('${text.replace(/'/g, "\\'")}')"><i class="fa-solid fa-volume-high"></i></button>` : ''}
         </div>
-        <div class="translation-sub" id="latestUserTrans">กำลังแปล...</div>
+        <div class="translation-sub" id="latestUserTrans">${subText}</div>
       </div>
     `);
     chatBody.scrollTop = chatBody.scrollHeight;
@@ -517,7 +441,7 @@
     const chatBody = document.getElementById('chatBody');
     chatBody.insertAdjacentHTML('beforeend', `
       <div class="chat-row ai" id="loadingBubble">
-        <div class="bubble" style="color: #94A3B8;"><i class="fa-solid fa-circle-notch fa-spin"></i> AI กำลังคิดคำตอบ...</div>
+        <div class="bubble" style="color: #94A3B8;"><i class="fa-solid fa-circle-notch fa-spin"></i> AI กำลังประมวลผล...</div>
       </div>
     `);
     chatBody.scrollTop = chatBody.scrollHeight;
@@ -536,36 +460,47 @@
       return;
     }
 
+    // อัปเดตการแปลข้อความของผู้ใช้ (สองทาง)
     const userTransEl = document.getElementById('latestUserTrans');
     if (userTransEl) {
-      userTransEl.innerText = `แปล: ${data.userTrans}`;
+      if (data.userTrans) {
+        userTransEl.innerText = `แปล: ${data.userTrans}`;
+      } else {
+        userTransEl.innerText = '';
+      }
       userTransEl.removeAttribute('id');
     }
 
+    // แสดงข้อความโต้ตอบจาก AI
     const chatBody = document.getElementById('chatBody');
-    const safeAiReply = data.aiReply.replace(/'/g, "\\'");
+    const safeAiReply = data.aiReply ? data.aiReply.replace(/'/g, "\\'") : '';
+    
     chatBody.insertAdjacentHTML('beforeend', `
       <div class="chat-row ai">
         <div class="bubble-wrapper">
-          <div class="bubble">${data.aiReply}</div>
+          <div class="bubble">${data.aiReply || 'ขออภัยครับ ไม่สามารถสร้างคำตอบได้'}</div>
           <button class="audio-play-btn" onclick="speakText('${safeAiReply}')"><i class="fa-solid fa-volume-high"></i></button>
         </div>
-        <div class="translation-sub">แปล: ${data.aiReplyThai}</div>
+        <div class="translation-sub">${data.aiReplyThai ? 'แปล: ' + data.aiReplyThai : ''}</div>
       </div>
     `);
     chatBody.scrollTop = chatBody.scrollHeight;
 
-    // เล่นเสียงตอบกลับของ AI ทันที
-    speakText(data.aiReply);
+    // อ่านเสียงตอบกลับภาษาอังกฤษของ AI
+    if (data.aiReply) {
+      speakText(data.aiReply);
+    }
 
     // อัปเดตการ์ดคะแนน
-    document.getElementById('evalCard').style.display = 'block';
-    document.getElementById('scoreBadge').querySelector('span').innerText = `${data.scores.total}/100`;
-    document.getElementById('pronVal').innerText = `${data.scores.pronunciation}%`;
-    document.getElementById('gramVal').innerText = `${data.scores.grammar}%`;
-    document.getElementById('vocabVal').innerText = `${data.scores.vocabulary}%`;
-    document.getElementById('fluencyVal').innerText = `${data.scores.fluency}%`;
-    document.getElementById('feedbackNote').querySelector('span').innerText = data.feedback || 'สื่อสารได้ดีมากครับ!';
+    if (data.scores) {
+      document.getElementById('evalCard').style.display = 'block';
+      document.getElementById('scoreBadge').querySelector('span').innerText = `${data.scores.total || 0}/100`;
+      document.getElementById('pronVal').innerText = `${data.scores.pronunciation || 0}%`;
+      document.getElementById('gramVal').innerText = `${data.scores.grammar || 0}%`;
+      document.getElementById('vocabVal').innerText = `${data.scores.vocabulary || 0}%`;
+      document.getElementById('fluencyVal').innerText = `${data.scores.fluency || 0}%`;
+      document.getElementById('feedbackNote').querySelector('span').innerText = data.feedback || 'สื่อสารได้ดีมากครับ!';
+    }
   }
 </script>
 
