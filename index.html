@@ -1,507 +1,1145 @@
 <!DOCTYPE html>
-<html lang="th">
-<head>
-  <base target="_top">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AI Speaking Pro</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<html>
+  <head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate" />
+  <meta http-equiv="Permissions-Policy" content="microphone=(self), autoplay=(self)">
+  <title>SpeakCoach - Practice English Speaking with AI</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <style>
-    :root {
-      --bg-gradient: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%);
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --card-border: rgba(255, 255, 255, 0.1);
-      --primary-accent: #6366F1;
-      --secondary-accent: #8B5CF6;
-      --user-bubble: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-      --ai-bubble: rgba(255, 255, 255, 0.07);
-      --text-main: #F8FAFC;
-      --text-sub: #94A3B8;
-      --glow-color: rgba(99, 102, 241, 0.35);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      font-family: 'Plus Jakarta Sans', 'Sarabun', sans-serif;
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
-      overflow: hidden;
-    }
-
-    .app-wrapper {
-      width: 100%;
-      max-width: 480px;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(20px);
-      border-left: 1px solid var(--card-border);
-      border-right: 1px solid var(--card-border);
-    }
-
-    /* Top Bar Header */
-    .top-bar {
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--card-border);
-      background: rgba(15, 23, 42, 0.8);
-      z-index: 10;
-    }
-
-    .brand-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 15px var(--glow-color);
-      font-size: 1.1rem;
-    }
-
-    .brand-text h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.3px; }
-    .brand-text p { font-size: 0.72rem; color: #10B981; font-weight: 500; display: flex; align-items: center; gap: 4px; }
-    .online-dot { width: 6px; height: 6px; background: #10B981; border-radius: 50%; display: inline-block; }
-
-    .score-badge {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--card-border);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #A7F3D0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Scenario Selection Scrollbar */
-    .scenario-container {
-      padding: 12px 16px;
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      background: rgba(15, 23, 42, 0.4);
-      border-bottom: 1px solid var(--card-border);
-    }
-    .scenario-container::-webkit-scrollbar { display: none; }
-
-    .scenario-btn {
-      padding: 8px 16px;
-      border-radius: 25px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text-sub);
-      font-size: 0.8rem;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .scenario-btn.active {
-      background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
-      color: white;
-      border-color: transparent;
-      box-shadow: 0 4px 12px var(--glow-color);
-    }
-
-    /* Chat Body */
-    .chat-body {
-      flex: 1;
-      padding: 20px 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .chat-row {
-      display: flex;
-      flex-direction: column;
-      max-width: 85%;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .chat-row.ai { align-self: flex-start; }
-    .chat-row.user { align-self: flex-end; }
-
-    .bubble-wrapper {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-    }
-
-    .chat-row.user .bubble-wrapper { flex-direction: row-reverse; }
-
-    .bubble {
-      padding: 12px 16px;
-      border-radius: 18px;
-      font-size: 0.92rem;
-      line-height: 1.5;
-      position: relative;
-    }
-
-    .chat-row.ai .bubble {
-      background: var(--ai-bubble);
-      border: 1px solid var(--card-border);
-      border-bottom-left-radius: 4px;
-      backdrop-filter: blur(10px);
-    }
-
-    .chat-row.user .bubble {
-      background: var(--user-bubble);
-      border-bottom-right-radius: 4px;
-      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-    }
-
-    .audio-play-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-
-    .audio-play-btn:active { transform: scale(0.95); background: var(--primary-accent); }
-
-    .translation-sub {
-      font-size: 0.78rem;
-      color: var(--text-sub);
-      margin-top: 5px;
-      padding: 0 4px;
-    }
-
-    .chat-row.user .translation-sub { text-align: right; color: #A5B4FC; }
-
-    /* Dashboard Evaluation Card */
-    .eval-card {
-      margin: 0 16px 12px;
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 12px 16px;
-      backdrop-filter: blur(15px);
-      display: none;
-      animation: slideUp 0.3s ease;
-    }
-
-    .eval-metrics {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .metric-box {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 8px 4px;
-      border-radius: 10px;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .metric-title { font-size: 0.65rem; color: var(--text-sub); }
-    .metric-val { font-size: 0.85rem; font-weight: 700; color: #818CF8; margin-top: 2px; }
-
-    .feedback-note {
-      font-size: 0.75rem;
-      color: #E2E8F0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(99, 102, 241, 0.15);
-      padding: 8px 12px;
-      border-radius: 8px;
-    }
-
-    /* Bottom Input Control Bar */
-    .input-bar {
-      padding: 14px 16px 20px;
-      background: rgba(15, 23, 42, 0.95);
-      border-top: 1px solid var(--card-border);
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .input-box-wrapper {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--card-border);
-      border-radius: 25px;
-      padding: 8px 18px;
-      display: flex;
-      align-items: center;
-    }
-
-    .text-input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: white;
-      font-size: 0.92rem;
-    }
-
-    .text-input::placeholder { color: var(--text-sub); }
-
-    .send-btn {
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
-      border: none;
-      color: white;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 0 15px var(--glow-color);
-      flex-shrink: 0;
-      transition: transform 0.15s ease;
-    }
-
-    .send-btn:active { transform: scale(0.92); }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
+    body { margin: 0; padding: 0; background: linear-gradient(180deg, #FDF3F6 0%, #FBE7EE 100%); }
+    .sc-display { font-family: 'Fraunces', serif; }
+    .sc-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+    .sc-scroll::-webkit-scrollbar-thumb { background: #E4DECF; border-radius: 4px; }
+    .sc-opt:hover { border-color: #D4622F !important; }
+    @keyframes sc-pop { 0%{transform:scale(0.96);opacity:0.6} 100%{transform:scale(1);opacity:1} }
+    @keyframes sc-pulse { 0%{box-shadow:0 0 0 0 rgba(212,98,47,0.45)} 70%{box-shadow:0 0 0 12px rgba(212,98,47,0)} 100%{box-shadow:0 0 0 0 rgba(212,98,47,0)} }
+    @keyframes sc-ring { from { stroke-dashoffset: var(--ring-start); } to { stroke-dashoffset: var(--ring-end); } }
+  </style>
 </head>
-<body>
+  <body>
+    <div id="root"></div>
 
-<div class="app-wrapper">
+    <script type="text/babel">
+      const { useState, useEffect, useRef, useCallback } = React;
 
-  <!-- Top Bar -->
-  <header class="top-bar">
-    <div class="brand-title">
-      <div class="brand-icon"><i class="fa-solid fa-robot"></i></div>
-      <div class="brand-text">
-        <h1>AI Speaking Pro</h1>
-        <p><span class="online-dot"></span> แปลและโต้ตอบอัตโนมัติ</p>
-      </div>
-    </div>
-    <div class="score-badge" id="scoreBadge"><i class="fa-solid fa-star" style="color:#F59E0B;"></i> <span>--</span></div>
-  </header>
+      const COLORS = {
+        paper: '#FDF3F6',
+        paperDark: '#FBE7EE',
+        ink: '#4A1942',
+        inkSoft: '#9B7A94',
+        accent: '#E85D8A',
+        accentSoft: '#F7C6D9',
+        mint: '#2D9C7C',
+        mintSoft: '#D3EDE3',
+        line: '#F3D9E4',
+      };
 
-  <!-- Scenario Selector -->
-  <nav class="scenario-container">
-    <button class="scenario-btn active" onclick="selectScenario('🍔 สั่งอาหาร', this)">🍔 สั่งอาหาร</button>
-    <button class="scenario-btn" onclick="selectScenario('🏨 โรงแรม', this)">🏨 โรงแรม</button>
-    <button class="scenario-btn" onclick="selectScenario('✈️ สนามบิน', this)">✈️ สนามบิน</button>
-    <button class="scenario-btn" onclick="selectScenario('💼 สัมภาษณ์งาน', this)">💼 สัมภาษณ์งาน</button>
-    <button class="scenario-btn" onclick="selectScenario('💬 ทั่วไป', this)">💬 สนทนาทั่วไป</button>
-  </nav>
+      // ==========================================
+      // แบบฝึกหัดคำศัพท์ / วลี แยกตามหมวด
+      // ==========================================
+      const CATEGORIES = [
+        { key: 'greeting', label: 'Greetings', thai: 'ทักทาย' },
+        { key: 'workplace', label: 'Workplace', thai: 'ที่ทำงาน' },
+        { key: 'daily', label: 'Daily Life', thai: 'ชีวิตประจำวัน' },
+        { key: 'restaurant', label: 'Restaurant', thai: 'ร้านอาหาร' },
+        { key: 'travel', label: 'Travel', thai: 'การเดินทาง' },
+      ];
 
-  <!-- Chat Messages Body -->
-  <main class="chat-body" id="chatBody">
-    <div class="chat-row ai">
-      <div class="bubble-wrapper">
-        <div class="bubble">Hello! Ready to practice English with me? You can type in English or Thai.</div>
-        <button class="audio-play-btn" onclick="speakText('Hello! Ready to practice English with me? You can type in English or Thai.')"><i class="fa-solid fa-volume-high"></i></button>
-      </div>
-      <div class="translation-sub">สวัสดีครับ! พร้อมฝึกภาษาอังกฤษหรือยังครับ? พิมพ์ได้ทั้งภาษาไทยและอังกฤษเลยนะครับ</div>
-    </div>
-  </main>
+      const VOCAB = [
+        { id: 'g1', category: 'greeting', phrase: 'How are you doing?', thai: 'สบายดีไหม' },
+        { id: 'g2', category: 'greeting', phrase: 'Nice to meet you.', thai: 'ยินดีที่ได้รู้จัก' },
+        { id: 'g3', category: 'greeting', phrase: 'Long time no see!', thai: 'ไม่ได้เจอกันนานเลย' },
+        { id: 'g4', category: 'greeting', phrase: 'Have a great day.', thai: 'ขอให้เป็นวันที่ดี' },
+        { id: 'g5', category: 'greeting', phrase: 'See you later.', thai: 'แล้วเจอกัน' },
+        { id: 'g6', category: 'greeting', phrase: 'Thanks so much for your help.', thai: 'ขอบคุณมากสำหรับความช่วยเหลือ' },
+        { id: 'g7', category: 'greeting', phrase: "I'm sorry to bother you.", thai: 'ขอโทษที่รบกวน' },
+        { id: 'g8', category: 'greeting', phrase: 'No worries at all.', thai: 'ไม่เป็นไรเลย' },
+        { id: 'g9', category: 'greeting', phrase: 'Take care of yourself.', thai: 'ดูแลตัวเองด้วยนะ' },
+        { id: 'g10', category: 'greeting', phrase: 'Congratulations!', thai: 'ขอแสดงความยินดี' },
 
-  <!-- Evaluation Card -->
-  <section class="eval-card" id="evalCard">
-    <div class="feedback-note" id="feedbackNote"><i class="fa-solid fa-bolt" style="color: #F59E0B;"></i> <span>สื่อสารได้ดีมากครับ!</span></div>
-    <div class="eval-metrics">
-      <div class="metric-box"><div class="metric-title">ออกเสียง</div><div class="metric-val" id="pronVal">0%</div></div>
-      <div class="metric-box"><div class="metric-title">ไวยากรณ์</div><div class="metric-val" id="gramVal">0%</div></div>
-      <div class="metric-box"><div class="metric-title">คำศัพท์</div><div class="metric-val" id="vocabVal">0%</div></div>
-      <div class="metric-box"><div class="metric-title">คล่องแคล่ว</div><div class="metric-val" id="fluencyVal">0%</div></div>
-    </div>
-  </section>
+        { id: 'w1', category: 'workplace', phrase: 'Could you send me the report by Friday?', thai: 'ช่วยส่งรายงานให้ภายในวันศุกร์ได้ไหม' },
+        { id: 'w2', category: 'workplace', phrase: "I'll follow up on that tomorrow.", thai: 'ฉันจะติดตามเรื่องนั้นพรุ่งนี้' },
+        { id: 'w3', category: 'workplace', phrase: 'Let me get back to you on this.', thai: 'ขอกลับไปตอบเรื่องนี้อีกที' },
+        { id: 'w4', category: 'workplace', phrase: 'Can we schedule a meeting?', thai: 'นัดประชุมกันได้ไหม' },
+        { id: 'w5', category: 'workplace', phrase: 'I have a question about the project.', thai: 'ฉันมีคำถามเกี่ยวกับโปรเจกต์' },
+        { id: 'w6', category: 'workplace', phrase: 'That sounds like a good plan.', thai: 'ฟังดูเป็นแผนที่ดี' },
+        { id: 'w7', category: 'workplace', phrase: "I'm running a bit behind schedule.", thai: 'ฉันทำงานล่าช้ากว่ากำหนดนิดหน่อย' },
+        { id: 'w8', category: 'workplace', phrase: 'Could you clarify what you mean?', thai: 'ช่วยอธิบายให้ชัดเจนขึ้นได้ไหม' },
+        { id: 'w9', category: 'workplace', phrase: "Let's touch base next week.", thai: 'มาคุยกันอีกทีสัปดาห์หน้า' },
+        { id: 'w10', category: 'workplace', phrase: 'I appreciate your feedback.', thai: 'ขอบคุณสำหรับความคิดเห็น' },
 
-  <!-- Bottom Control Input Bar -->
-  <div class="input-bar">
-    <div class="input-box-wrapper">
-      <input type="text" id="userInput" class="text-input" placeholder="พิมพ์ภาษาไทย หรือ English ที่นี่..." onkeypress="if(event.key==='Enter') handleSend()">
-    </div>
-    <button class="send-btn" onclick="handleSend()" title="ส่งข้อความ">
-      <i class="fa-solid fa-paper-plane"></i>
-    </button>
-  </div>
+        { id: 'd1', category: 'daily', phrase: 'What time do you usually wake up?', thai: 'ปกติตื่นกี่โมง' },
+        { id: 'd2', category: 'daily', phrase: 'I need to run some errands.', thai: 'ฉันต้องไปทำธุระบางอย่าง' },
+        { id: 'd3', category: 'daily', phrase: "I'm feeling a bit tired today.", thai: 'วันนี้รู้สึกเหนื่อยนิดหน่อย' },
+        { id: 'd4', category: 'daily', phrase: "What's the weather like today?", thai: 'วันนี้อากาศเป็นยังไงบ้าง' },
+        { id: 'd5', category: 'daily', phrase: 'I usually work out in the evening.', thai: 'ปกติฉันออกกำลังกายตอนเย็น' },
+        { id: 'd6', category: 'daily', phrase: 'Can you help me with this?', thai: 'ช่วยฉันเรื่องนี้ได้ไหม' },
+        { id: 'd7', category: 'daily', phrase: 'I forgot to bring my umbrella.', thai: 'ฉันลืมเอาร่มมา' },
+        { id: 'd8', category: 'daily', phrase: "Let's grab a coffee sometime.", thai: 'ไปดื่มกาแฟกันสักวัน' },
+        { id: 'd9', category: 'daily', phrase: "I'm looking forward to the weekend.", thai: 'ฉันรอคอยวันหยุดสุดสัปดาห์' },
+        { id: 'd10', category: 'daily', phrase: 'How was your day?', thai: 'วันนี้เป็นอย่างไรบ้าง' },
 
-</div>
+        { id: 'r1', category: 'restaurant', phrase: 'Could I see the menu, please?', thai: 'ขอดูเมนูหน่อยได้ไหม' },
+        { id: 'r2', category: 'restaurant', phrase: "I'd like to order the grilled salmon.", thai: 'ฉันขอสั่งปลาแซลมอนย่าง' },
+        { id: 'r3', category: 'restaurant', phrase: 'Is this dish spicy?', thai: 'จานนี้เผ็ดไหม' },
+        { id: 'r4', category: 'restaurant', phrase: 'Can I get the bill, please?', thai: 'ขอเช็คบิลหน่อยได้ไหม' },
+        { id: 'r5', category: 'restaurant', phrase: 'Do you have any vegetarian options?', thai: 'มีเมนูมังสวิรัติไหม' },
+        { id: 'r6', category: 'restaurant', phrase: "I'll have the same, please.", thai: 'ขอสั่งเหมือนกันเลย' },
+        { id: 'r7', category: 'restaurant', phrase: 'Could we get a table for two?', thai: 'ขอโต๊ะสำหรับสองคนได้ไหม' },
+        { id: 'r8', category: 'restaurant', phrase: 'This tastes amazing.', thai: 'อร่อยมากเลย' },
+        { id: 'r9', category: 'restaurant', phrase: 'Can I have some water, please?', thai: 'ขอน้ำเปล่าหน่อยได้ไหม' },
+        { id: 'r10', category: 'restaurant', phrase: "I'd like it to go, please.", thai: 'ขอห่อกลับบ้านด้วย' },
 
-<script>
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbymLPSETMSlqdQxbjR34vew3z7FX6pkti9uPIuuksduKTw0MZP0W6l6--WNI8ZMQv_0/exec";
+        { id: 't1', category: 'travel', phrase: 'Where is the nearest train station?', thai: 'สถานีรถไฟที่ใกล้ที่สุดอยู่ที่ไหน' },
+        { id: 't2', category: 'travel', phrase: 'How much does a ticket cost?', thai: 'ตั๋วราคาเท่าไหร่' },
+        { id: 't3', category: 'travel', phrase: 'Could you recommend a good hotel?', thai: 'ช่วยแนะนำโรงแรมดีๆ ได้ไหม' },
+        { id: 't4', category: 'travel', phrase: "I'm looking for the airport.", thai: 'ฉันกำลังหาสนามบิน' },
+        { id: 't5', category: 'travel', phrase: 'Is it within walking distance?', thai: 'เดินไปได้ไหม' },
+        { id: 't6', category: 'travel', phrase: "I'd like to check in, please.", thai: 'ขอเช็คอินหน่อยครับ/ค่ะ' },
+        { id: 't7', category: 'travel', phrase: 'What time does the museum open?', thai: 'พิพิธภัณฑ์เปิดกี่โมง' },
+        { id: 't8', category: 'travel', phrase: 'Could you call a taxi for me?', thai: 'ช่วยเรียกแท็กซี่ให้หน่อยได้ไหม' },
+        { id: 't9', category: 'travel', phrase: "I think I'm lost.", thai: 'ฉันคิดว่าฉันหลงทาง' },
+        { id: 't10', category: 'travel', phrase: 'Do you accept credit cards?', thai: 'รับบัตรเครดิตไหม' },
+      ];
 
-  let currentScenario = '🍔 สั่งอาหาร';
+      const TABS = [
+        {
+          key: 'learn',
+          label: 'Learn',
+          icon: (props) => (
+            <svg width={props.size || 16} height={props.size || 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          )
+        },
+        {
+          key: 'speak',
+          label: 'Speak',
+          icon: (props) => (
+            <svg width={props.size || 16} height={props.size || 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          )
+        },
+        {
+          key: 'quiz',
+          label: 'Quiz',
+          icon: (props) => (
+            <svg width={props.size || 16} height={props.size || 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          )
+        },
+        {
+          key: 'chat',
+          label: 'Conversation',
+          icon: (props) => (
+            <svg width={props.size || 16} height={props.size || 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          )
+        },
+      ];
 
-  function isThaiText(text) {
-    const thaiRegex = /[\u0E00-\u0E7F]/;
-    return thaiRegex.test(text);
-  }
+      // สถานการณ์สนทนาให้เลือก — AI จะสวมบทบาทตามสถานการณ์ที่เลือก
+      const SCENARIOS = [
+        {
+          key: 'general',
+          label: 'Free Talk',
+          thai: 'พูดคุยทั่วไป',
+          emoji: '💬',
+          role: 'a friendly English coach having a casual, open-ended conversation',
+          opener: "Hi there! I'm Coach Alex. What would you like to talk about today?",
+          openerThai: 'สวัสดี! ฉันคือโค้ชอเล็กซ์ วันนี้อยากคุยเรื่องอะไรดี',
+        },
+        {
+          key: 'restaurant',
+          label: 'Restaurant',
+          thai: 'สั่งอาหารที่ร้าน',
+          emoji: '🍽️',
+          role: 'a waiter/waitress at a restaurant taking the learner\'s order',
+          opener: "Good evening! Welcome to our restaurant. Have you had a chance to look at the menu?",
+          openerThai: 'สวัสดีตอนเย็นค่ะ ยินดีต้อนรับ ดูเมนูแล้วหรือยังคะ',
+        },
+        {
+          key: 'airport',
+          label: 'Airport',
+          thai: 'ที่สนามบิน',
+          emoji: '✈️',
+          role: 'an airline check-in staff member helping the learner at the airport',
+          opener: "Hello! Could I see your passport and ticket, please?",
+          openerThai: 'สวัสดีค่ะ ขอดูพาสปอร์ตและตั๋วหน่อยได้ไหมคะ',
+        },
+        {
+          key: 'interview',
+          label: 'Job Interview',
+          thai: 'สัมภาษณ์งาน',
+          emoji: '💼',
+          role: 'a hiring manager conducting a friendly but professional job interview with the learner',
+          opener: "Thanks for coming in today. Could you start by telling me a little about yourself?",
+          openerThai: 'ขอบคุณที่มาสัมภาษณ์วันนี้นะคะ ช่วยเล่าเกี่ยวกับตัวเองสั้นๆ ได้ไหมคะ',
+        },
+        {
+          key: 'hotel',
+          label: 'Hotel Check-in',
+          thai: 'เช็คอินโรงแรม',
+          emoji: '🏨',
+          role: 'a hotel receptionist helping the learner check in',
+          opener: "Welcome to our hotel! Do you have a reservation with us?",
+          openerThai: 'ยินดีต้อนรับสู่โรงแรมค่ะ มีการจองห้องไว้แล้วใช่ไหมคะ',
+        },
+        {
+          key: 'shopping',
+          label: 'Shopping',
+          thai: 'ช้อปปิ้ง',
+          emoji: '🛍️',
+          role: 'a shop assistant helping the learner find and buy something in a store',
+          opener: "Hi! Let me know if you need any help finding something.",
+          openerThai: 'สวัสดีค่ะ ถ้าต้องการความช่วยเหลือหาสินค้า บอกได้เลยนะคะ',
+        },
+      ];
 
-  function selectScenario(name, element) {
-    currentScenario = name;
-    document.querySelectorAll('.scenario-btn').forEach(el => el.classList.remove('active'));
-    element.classList.add('active');
-    
-    document.getElementById('chatBody').innerHTML = `
-      <div class="chat-row ai">
-        <div class="bubble-wrapper">
-          <div class="bubble">Let's practice: ${name}</div>
-          <button class="audio-play-btn" onclick="speakText('Let\\'s practice ${name}')"><i class="fa-solid fa-volume-high"></i></button>
-        </div>
-        <div class="translation-sub">เริ่มฝึกสถานการณ์: ${name}</div>
-      </div>
-    `;
-    document.getElementById('evalCard').style.display = 'none';
-  }
+      function getScenario(key) {
+        return SCENARIOS.find((s) => s.key === key) || SCENARIOS[0];
+      }
 
-  function speakText(text) {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = 'en-US';
-      window.speechSynthesis.speak(utter);
-    }
-  }
+      // System prompt: AI เป็นทั้งคู่สนทนาและผู้ประเมินทักษะการสื่อสาร
+      // ตอบกลับเป็น JSON ที่มีทั้งบทสนทนาต่อและคะแนน/คำแนะนำ (ตามที่ British Council AiBC ทำ)
+      // ปรับบทบาทตามสถานการณ์ (scenario) ที่ผู้เรียนเลือก
+      function buildSystemPrompt(scenario) {
+        return `You are "Coach Alex", a friendly and encouraging AI English speaking coach for Thai learners (beginner to intermediate level).
 
-  async function handleSend() {
-    const inputEl = document.getElementById('userInput');
-    const text = inputEl.value.trim();
-    if (!text) return;
+For this conversation, roleplay as ${scenario.role}. Stay in character while also coaching the learner's English.
 
-    appendUserMsg(text);
-    inputEl.value = '';
-    appendLoadingMsg();
+The learner's last message may be in English or in Thai:
 
-    try {
-      const response = await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ scenario: currentScenario, message: text })
-      });
-      
-      const data = await response.json();
-      renderAIResponse(data);
-    } catch (err) {
-      removeLoadingMsg();
-      alert("การเชื่อมต่อล้มเหลว ตรวจสอบ Web App URL อีกครั้งครับ: " + err);
-    }
-  }
+CASE A — the learner's last message is in English (may contain mistakes):
+- Reply with "JSON only". No text outside the JSON. No backticks, no preamble.
+- JSON format: {"mode":"score","reply":"A short, natural English reply that continues the roleplay conversation, appropriate to what the learner said and to your role","replyThai":"Thai translation of your reply","scores":{"grammar":0-100,"fluency":0-100,"vocabulary":0-100},"feedback":"A short, encouraging tip in Thai about how to improve the learner's last sentence (grammar, word choice, or naturalness). If the sentence was already great, say so and give one small tip to sound even more natural.","corrected":"If there was a mistake, show the corrected English sentence. If no mistake, leave this empty."}
+- Score based on the learner's LAST message only (grammar accuracy, fluency/naturalness of phrasing, vocabulary appropriateness).
 
-  function appendUserMsg(text) {
-    const chatBody = document.getElementById('chatBody');
-    const isThai = isThaiText(text);
-    const subText = isThai ? "กำลังแปลเป็นภาษาอังกฤษ..." : "กำลังแปลเป็นภาษาไทย...";
+CASE B — the learner's last message is in Thai (they want to know how to say it in English):
+- Reply with "JSON only". No text outside the JSON. No backticks, no preamble.
+- JSON format: {"mode":"translate","englishVersion":"A natural, conversational English translation of what the learner wrote, appropriate to the roleplay context","reply":"A short, natural English reply that continues the roleplay conversation, as if the learner had just said englishVersion to you","replyThai":"Thai translation of your reply"}
+- Do NOT include "scores", "feedback", or "corrected" in CASE B — the learner did not write English themselves, so there is nothing of theirs to score.
 
-    chatBody.insertAdjacentHTML('beforeend', `
-      <div class="chat-row user">
-        <div class="bubble-wrapper">
-          <div class="bubble">${text}</div>
-          ${!isThai ? `<button class="audio-play-btn" onclick="speakText('${text.replace(/'/g, "\\'")}')"><i class="fa-solid fa-volume-high"></i></button>` : ''}
-        </div>
-        <div class="translation-sub" id="latestUserTrans">${subText}</div>
-      </div>
-    `);
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
+In both cases, keep "reply" short (1-2 sentences) and conversational, staying in character for the roleplay. Be warm and supportive, never harsh or discouraging.`;
+      }
 
-  function appendLoadingMsg() {
-    const chatBody = document.getElementById('chatBody');
-    chatBody.insertAdjacentHTML('beforeend', `
-      <div class="chat-row ai" id="loadingBubble">
-        <div class="bubble" style="color: #94A3B8;"><i class="fa-solid fa-circle-notch fa-spin"></i> AI กำลังประมวลผล...</div>
-      </div>
-    `);
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = a[i];
+          a[i] = a[j];
+          a[j] = temp;
+        }
+        return a;
+      }
 
-  function removeLoadingMsg() {
-    const loading = document.getElementById('loadingBubble');
-    if (loading) loading.remove();
-  }
+      function normalizeText(s) {
+        return (s || '').toLowerCase().replace(/[.,!?'"]/g, '').replace(/\s+/g, ' ').trim();
+      }
 
-  function renderAIResponse(data) {
-    removeLoadingMsg();
+      // ตรวจว่าข้อความมีตัวอักษรไทยอยู่หรือไม่ (ใช้แยกโหมด: พิมพ์อังกฤษฝึกพูด vs พิมพ์ไทยขอคำแปล)
+      function containsThai(s) {
+        return /[\u0E00-\u0E7F]/.test(s || '');
+      }
 
-    if (data.error) {
-      alert(data.error);
-      return;
-    }
+      function SpeakButton({ text, size = 18, onSpeak }) {
+        return (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              if (typeof onSpeak === 'function') onSpeak(text);
+            }}
+            style={{
+              width: size + 22, height: size + 22, borderRadius: '999px',
+              border: `1px solid ${COLORS.line}`, background: COLORS.paper,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: COLORS.accent, cursor: 'pointer', flexShrink: 0,
+            }}
+            aria-label="Listen"
+          >
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+          </button>
+        );
+      }
 
-    // อัปเดตการแปลข้อความของผู้ใช้ (สองทาง)
-    const userTransEl = document.getElementById('latestUserTrans');
-    if (userTransEl) {
-      if (data.userTrans) {
-        userTransEl.innerText = `แปล: ${data.userTrans}`;
-      } else {
-        userTransEl.innerText = '';
-      }
-      userTransEl.removeAttribute('id');
-    }
+      // วงแหวนแสดงคะแนน (radial score ring) — ใช้แทนการ์ดสี่เหลี่ยมแบบเดิม
+      function ScoreRing({ label, value, size = 84 }) {
+        const stroke = 7;
+        const r = (size - stroke) / 2;
+        const circumference = 2 * Math.PI * r;
+        const offset = circumference - (value / 100) * circumference;
+        const color = value >= 80 ? COLORS.mint : value >= 60 ? COLORS.accent : '#C4453B';
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={COLORS.line} strokeWidth={stroke} />
+              <circle
+                cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+                strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
+                style={{ transition: 'stroke-dashoffset 700ms ease' }}
+              />
+              <text
+                x="50%" y="50%" textAnchor="middle" dy="0.35em"
+                transform={`rotate(90 ${size/2} ${size/2})`}
+                className="sc-display"
+                style={{ fontSize: 20, fontWeight: 700, fill: COLORS.ink }}
+              >
+                {value}
+              </text>
+            </svg>
+            <div style={{ fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>{label}</div>
+          </div>
+        );
+      }
 
-    // แสดงข้อความโต้ตอบจาก AI
-    const chatBody = document.getElementById('chatBody');
-    const safeAiReply = data.aiReply ? data.aiReply.replace(/'/g, "\\'") : '';
-    
-    chatBody.insertAdjacentHTML('beforeend', `
-      <div class="chat-row ai">
-        <div class="bubble-wrapper">
-          <div class="bubble">${data.aiReply || 'ขออภัยครับ ไม่สามารถสร้างคำตอบได้'}</div>
-          <button class="audio-play-btn" onclick="speakText('${safeAiReply}')"><i class="fa-solid fa-volume-high"></i></button>
-        </div>
-        <div class="translation-sub">${data.aiReplyThai ? 'แปล: ' + data.aiReplyThai : ''}</div>
-      </div>
-    `);
-    chatBody.scrollTop = chatBody.scrollHeight;
+      function SpeakCoach() {
+        const [tab, setTab] = useState('chat');
+        const [voices, setVoices] = useState([]);
 
-    // อ่านเสียงตอบกลับภาษาอังกฤษของ AI
-    if (data.aiReply) {
-      speakText(data.aiReply);
-    }
+        useEffect(() => {
+          if (!('speechSynthesis' in window)) return;
+          const updateVoices = () => {
+            const availableVoices = window.speechSynthesis.getVoices();
+            if (availableVoices.length > 0) setVoices(availableVoices);
+          };
+          updateVoices();
+          window.speechSynthesis.onvoiceschanged = updateVoices;
+          return () => { window.speechSynthesis.onvoiceschanged = null; };
+        }, []);
 
-    // อัปเดตการ์ดคะแนน
-    if (data.scores) {
-      document.getElementById('evalCard').style.display = 'block';
-      document.getElementById('scoreBadge').querySelector('span').innerText = `${data.scores.total || 0}/100`;
-      document.getElementById('pronVal').innerText = `${data.scores.pronunciation || 0}%`;
-      document.getElementById('gramVal').innerText = `${data.scores.grammar || 0}%`;
-      document.getElementById('vocabVal').innerText = `${data.scores.vocabulary || 0}%`;
-      document.getElementById('fluencyVal').innerText = `${data.scores.fluency || 0}%`;
-      document.getElementById('feedbackNote').querySelector('span').innerText = data.feedback || 'สื่อสารได้ดีมากครับ!';
-    }
-  }
-</script>
+        const speak = useCallback((text, rate = 0.95, callback) => {
+          if (!('speechSynthesis' in window) || !text) {
+            if (typeof callback === 'function') callback();
+            return;
+          }
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'en-US';
+          u.rate = rate;
 
-</body>
+          const currentVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices();
+          const en = currentVoices.find((v) => v.lang && v.lang.toLowerCase().startsWith('en'));
+          if (en) u.voice = en;
+
+          if (typeof callback === 'function') {
+            u.onend = callback;
+            u.onerror = callback;
+          }
+          setTimeout(() => window.speechSynthesis.speak(u), 50);
+        }, [voices]);
+
+        return (
+          <div style={{
+            fontFamily: "'Inter','Noto Sans Thai',sans-serif",
+            color: COLORS.ink,
+            minHeight: '100vh', width: '100%', boxSizing: 'border-box',
+            padding: '28px 16px 56px',
+          }}>
+            <BrandMark />
+            <SegmentedTabs tab={tab} setTab={setTab} />
+
+            <div style={{
+              maxWidth: 640, margin: '22px auto 0', background: '#fff',
+              borderRadius: 28, padding: '26px 22px',
+              boxShadow: '0 20px 50px rgba(74,25,66,0.10)',
+            }}>
+              {tab === 'learn' && <LearnTab speak={speak} />}
+              {tab === 'speak' && <SpeakTab speak={speak} />}
+              {tab === 'quiz' && <QuizTab speak={speak} />}
+              {tab === 'chat' && <ChatTab speak={speak} />}
+            </div>
+          </div>
+        );
+      }
+
+      // ตราสัญลักษณ์ตรงกลางบนสุด — แทน header แบบชิดซ้ายเดิม
+      function BrandMark() {
+        return (
+          <div style={{ textAlign: 'center', maxWidth: 640, margin: '0 auto' }}>
+            <div style={{
+              width: 52, height: 52, margin: '0 auto', borderRadius: '50%',
+              background: `linear-gradient(135deg, ${COLORS.accent}, #C43D72)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 10px 24px rgba(232,93,138,0.35)',
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </div>
+            <h1 className="sc-display" style={{ margin: '12px 0 4px', fontSize: 26, fontWeight: 600, color: COLORS.ink }}>
+              SpeakCoach
+            </h1>
+            <p style={{ margin: 0, fontSize: 13, color: COLORS.inkSoft }}>
+              คุยกับ AI ฝึกพูดภาษาอังกฤษ รับคะแนนและคำแนะนำทันที
+            </p>
+          </div>
+        );
+      }
+
+      // แถบแท็บแบบแคปซูลลอยตรงกลาง (segmented control) — แทน sidebar/bottom-nav เดิม
+      function SegmentedTabs({ tab, setTab }) {
+        return (
+          <div style={{
+            maxWidth: 640, margin: '20px auto 0', display: 'flex',
+            background: COLORS.paperDark, borderRadius: 999, padding: 5,
+            gap: 2, overflowX: 'auto',
+          }} className="sc-scroll">
+            {TABS.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.key;
+              return (
+                <button
+                  type="button"
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  style={{
+                    flex: '1 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    padding: '10px 14px', borderRadius: 999, border: 'none',
+                    background: active ? '#fff' : 'transparent',
+                    color: active ? COLORS.ink : COLORS.inkSoft,
+                    fontWeight: active ? 600 : 500, fontSize: 13.5, cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    boxShadow: active ? '0 4px 12px rgba(74,25,66,0.10)' : 'none',
+                    transition: 'background 150ms ease, box-shadow 150ms ease',
+                  }}
+                >
+                  <Icon size={15} />
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        );
+      }
+
+      function CategoryChips({ value, onChange }) {
+        return (
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }} className="sc-scroll">
+            {CATEGORIES.map((c) => {
+              const active = value === c.key;
+              return (
+                <button
+                  type="button"
+                  key={c.key}
+                  onClick={() => onChange(c.key)}
+                  style={{
+                    padding: '8px 14px', borderRadius: 8, whiteSpace: 'nowrap',
+                    border: `1px solid ${active ? COLORS.accent : COLORS.line}`,
+                    background: active ? COLORS.accent : COLORS.paper,
+                    color: active ? '#fff' : COLORS.ink,
+                    fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
+        );
+      }
+
+      function LearnTab({ speak }) {
+        const [cat, setCat] = useState('greeting');
+        const items = VOCAB.filter((v) => v.category === cat);
+        return (
+          <div>
+            <CategoryChips value={cat} onChange={setCat} />
+            <div style={{
+              marginTop: 18, display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12,
+            }}>
+              {items.map((v) => (
+                <div key={v.id} style={{
+                  border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: '16px 16px',
+                  background: '#fff', display: 'flex', flexDirection: 'column', gap: 6,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                    <div className="sc-display" style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.4 }}>{v.phrase}</div>
+                    <SpeakButton text={v.phrase} size={14} onSpeak={speak} />
+                  </div>
+                  <div style={{ fontSize: 13.5, color: COLORS.inkSoft }}>{v.thai}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      function SpeakTab({ speak }) {
+        const [cat, setCat] = useState('greeting');
+        const items = VOCAB.filter((v) => v.category === cat);
+        const [idx, setIdx] = useState(0);
+        const [micState, setMicState] = useState('idle');
+        const [transcript, setTranscript] = useState('');
+        const recRef = useRef(null);
+        const current = items[idx] || items[0];
+
+        useEffect(() => { setIdx(0); setMicState('idle'); setTranscript(''); }, [cat]);
+
+        function startListening() {
+          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (!SR) { setMicState('unsupported'); return; }
+          if (recRef.current) { try { recRef.current.abort(); } catch (e) {} }
+
+          try {
+            const rec = new SR();
+            rec.lang = 'en-US';
+            rec.interimResults = false;
+            rec.maxAlternatives = 3;
+            recRef.current = rec;
+            setTranscript('');
+
+            rec.onstart = () => setMicState('listening');
+
+            rec.onresult = (e) => {
+              if (!e.results || !e.results[0]) return;
+              const alts = Array.from(e.results[0]).map((r) => r.transcript);
+              const spokenText = alts[0] || '';
+              setTranscript(spokenText);
+
+              const target = normalizeText(current.phrase);
+              const hit = alts.some((a) => normalizeText(a) === target);
+              setMicState(hit ? 'correct' : 'wrong');
+            };
+
+            rec.onerror = (e) => {
+              if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                setMicState('denied');
+              } else {
+                setMicState('wrong');
+              }
+            };
+
+            rec.onend = () => setMicState((p) => (p === 'listening' ? 'idle' : p));
+
+            rec.start();
+          } catch (err) {
+            setMicState('unsupported');
+          }
+        }
+
+        function stopListening() {
+          if (recRef.current) recRef.current.stop();
+        }
+
+        function next(delta) {
+          setMicState('idle'); setTranscript('');
+          setIdx((i) => (i + delta + items.length) % items.length);
+        }
+
+        if (!current) return null;
+
+        const feedback = {
+          idle: { text: 'Tap the mic and try saying this phrase', color: COLORS.inkSoft },
+          listening: { text: "Listening... go ahead", color: COLORS.accent },
+          correct: { text: 'Great! That sounded right 👏', color: COLORS.mint },
+          wrong: { text: `Not quite — try again (heard: "${transcript || '...'}")`, color: COLORS.accent },
+          denied: { text: 'Microphone access denied — you can still listen and repeat on your own', color: '#C4453B' },
+          unsupported: { text: 'Voice recognition is not supported in this browser', color: '#C4453B' },
+        }[micState];
+
+        return (
+          <div>
+            <CategoryChips value={cat} onChange={setCat} />
+            <div style={{
+              marginTop: 18, border: `1px solid ${COLORS.line}`, borderRadius: 16,
+              background: '#fff', padding: '36px 20px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 10 }}>
+                Phrase {idx + 1} of {items.length}
+              </div>
+              <div className="sc-display" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }}>{current.phrase}</div>
+              <div style={{ fontSize: 15, color: COLORS.inkSoft, marginTop: 6 }}>{current.thai}</div>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 14, marginTop: 24 }}>
+                <button type="button" onClick={() => speak(current.phrase)} style={{
+                  display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px',
+                  borderRadius: 999, border: `1px solid ${COLORS.line}`, background: COLORS.paper,
+                  color: COLORS.ink, fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                }}>
+                  <span style={{ fontSize: 16 }}>🔊</span> Listen
+                </button>
+                <button
+                  type="button"
+                  onClick={micState === 'listening' ? stopListening : startListening}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px',
+                    borderRadius: 999, border: 'none',
+                    background: micState === 'listening' ? '#C4453B' : COLORS.accent,
+                    color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                    animation: micState === 'listening' ? 'sc-pulse 1.4s infinite' : 'none',
+                  }}
+                >
+                  {micState === 'listening' ? 'Stop' : 'Repeat'}
+                </button>
+              </div>
+
+              <div style={{ marginTop: 18, fontSize: 13.5, color: feedback.color, minHeight: 20, fontWeight: 500 }}>
+                {feedback.text}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14 }}>
+              <button type="button" onClick={() => next(-1)} style={navBtnStyle}>← Previous</button>
+              <button type="button" onClick={() => next(1)} style={navBtnStyle}>Next →</button>
+            </div>
+          </div>
+        );
+      }
+
+      const navBtnStyle = {
+        padding: '8px 14px', borderRadius: 8, border: `1px solid ${COLORS.line}`,
+        background: '#fff', color: COLORS.ink, fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
+      };
+
+      function buildQuiz(catKey) {
+        const pool = VOCAB.filter((v) => v.category === catKey);
+        const qCount = Math.min(8, pool.length);
+        return shuffle(pool).slice(0, qCount).map((item) => {
+          const distractors = shuffle(pool.filter((v) => v.id !== item.id)).slice(0, 3);
+          const options = shuffle([item, ...distractors]);
+          return { item, options };
+        });
+      }
+
+      function QuizTab({ speak }) {
+        const [cat, setCat] = useState('greeting');
+        const [questions, setQuestions] = useState(() => buildQuiz('greeting'));
+        const [qi, setQi] = useState(0);
+        const [score, setScore] = useState(0);
+        const [selected, setSelected] = useState(null);
+        const [done, setDone] = useState(false);
+
+        function restart(newCat) {
+          const c = newCat || cat;
+          setCat(c);
+          setQuestions(buildQuiz(c));
+          setQi(0); setScore(0); setSelected(null); setDone(false);
+        }
+
+        const q = questions[qi];
+
+        function choose(opt) {
+          if (selected) return;
+          setSelected(opt.id);
+          if (opt.id === q.item.id) setScore((s) => s + 1);
+        }
+
+        function nextQuestion() {
+          if (qi + 1 >= questions.length) { setDone(true); return; }
+          setQi((i) => i + 1);
+          setSelected(null);
+        }
+
+        if (done) {
+          return (
+            <div style={{
+              border: `1px solid ${COLORS.line}`, borderRadius: 16, background: '#fff',
+              padding: '40px 20px', textAlign: 'center',
+            }}>
+              <div className="sc-display" style={{ fontSize: 22, fontWeight: 700 }}>Quiz complete!</div>
+              <div style={{ fontSize: 15, color: COLORS.inkSoft, marginTop: 8 }}>
+                Your score: <b style={{ color: COLORS.ink }}>{score} / {questions.length}</b>
+              </div>
+              <button type="button" onClick={() => restart()} style={{
+                marginTop: 20, padding: '10px 20px', borderRadius: 999, border: 'none',
+                background: COLORS.accent, color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+              }}>
+                Try Again
+              </button>
+            </div>
+          );
+        }
+
+        if (!q) return null;
+
+        return (
+          <div>
+            <CategoryChips value={cat} onChange={(c) => restart(c)} />
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0 10px' }}>
+              <span style={{ fontSize: 13, color: COLORS.inkSoft }}>Question {qi + 1} / {questions.length}</span>
+              <span style={{ fontSize: 13, color: COLORS.inkSoft }}>Score {score}</span>
+            </div>
+
+            <div style={{
+              border: `1px solid ${COLORS.line}`, borderRadius: 16, background: '#fff',
+              padding: '28px 20px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 12 }}>What does this mean?</div>
+              <div className="sc-display" style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }}>{q.item.phrase}</div>
+              <div style={{ marginTop: 10 }}>
+                <SpeakButton text={q.item.phrase} size={15} onSpeak={speak} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
+              {q.options.map((opt) => {
+                const isCorrect = opt.id === q.item.id;
+                const isChosen = selected === opt.id;
+                let bg = '#fff', border = COLORS.line;
+                if (selected) {
+                  if (isCorrect) { bg = COLORS.mintSoft; border = COLORS.mint; }
+                  else if (isChosen) { bg = COLORS.accentSoft; border = COLORS.accent; }
+                }
+                return (
+                  <button
+                    type="button"
+                    key={opt.id}
+                    className="sc-opt"
+                    onClick={() => choose(opt)}
+                    style={{
+                      border: `1.5px solid ${border}`, background: bg, color: COLORS.ink,
+                      borderRadius: 10, padding: '14px 10px', fontSize: 14,
+                      cursor: selected ? 'default' : 'pointer',
+                      animation: selected && (isCorrect || isChosen) ? 'sc-pop 150ms ease' : 'none',
+                    }}
+                  >
+                    {opt.thai}
+                  </button>
+                );
+              })}
+            </div>
+
+            {selected && (
+              <button type="button" onClick={nextQuestion} style={{
+                marginTop: 16, width: '100%', padding: '12px', borderRadius: 10, border: 'none',
+                background: COLORS.ink, color: COLORS.paper, fontWeight: 600, fontSize: 14.5, cursor: 'pointer',
+              }}>
+                {qi + 1 >= questions.length ? 'See Results' : 'Next Question'}
+              </button>
+            )}
+          </div>
+        );
+      }
+
+      // หน้าเลือกสถานการณ์แบบเต็มหน้า — แสดงก่อนเข้าสู่การสนทนา
+      function ScenarioLanding({ onSelect }) {
+        return (
+          <div>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div className="sc-display" style={{ fontSize: 22, fontWeight: 700, color: COLORS.ink }}>
+                Choose a scenario to practice
+              </div>
+              <div style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 6 }}>
+                เลือกสถานการณ์ที่อยากฝึกพูด แล้ว AI จะสวมบทบาทคู่สนทนาให้
+              </div>
+            </div>
+
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12,
+            }}>
+              {SCENARIOS.map((s) => (
+                <button
+                  type="button"
+                  key={s.key}
+                  onClick={() => onSelect(s.key)}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                    padding: '24px 14px', borderRadius: 16, border: `1px solid ${COLORS.line}`,
+                    background: '#fff', cursor: 'pointer', textAlign: 'center',
+                  }}
+                >
+                  <span style={{ fontSize: 32 }}>{s.emoji}</span>
+                  <span className="sc-display" style={{ fontSize: 14.5, fontWeight: 600, color: COLORS.ink }}>{s.label}</span>
+                  <span style={{ fontSize: 12.5, color: COLORS.inkSoft }}>{s.thai}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      // แถบด้านบนของหน้าแชท แสดงสถานการณ์ปัจจุบัน + ปุ่มเปลี่ยนสถานการณ์
+      function ScenarioBar({ scenario, onChangeScenario }) {
+        return (
+          <button
+            type="button"
+            onClick={onChangeScenario}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 16px', borderRadius: 14, border: `1px solid ${COLORS.line}`,
+              background: '#fff', cursor: 'pointer', marginBottom: 14,
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>{scenario.emoji}</span>
+              <span style={{ textAlign: 'left' }}>
+                <div className="sc-display" style={{ fontSize: 14.5, fontWeight: 600, color: COLORS.ink }}>{scenario.label}</div>
+                <div style={{ fontSize: 12, color: COLORS.inkSoft }}>{scenario.thai}</div>
+              </span>
+            </span>
+            <span style={{ fontSize: 12.5, color: COLORS.accent, fontWeight: 600 }}>Change</span>
+          </button>
+        );
+      }
+
+      function ChatTab({ speak }) {
+        const [scenarioKey, setScenarioKey] = useState(null); // null = ยังไม่เลือกสถานการณ์ → แสดงหน้า landing
+        const [messages, setMessages] = useState([]);
+        const [input, setInput] = useState('');
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState('');
+        const [micState, setMicState] = useState('idle');
+        const [sessionScores, setSessionScores] = useState([]);
+        const scrollRef = useRef(null);
+        const recRef = useRef(null);
+
+        const scenario = scenarioKey ? getScenario(scenarioKey) : null;
+
+        function startScenario(key) {
+          setScenarioKey(key);
+          const s = getScenario(key);
+          setMessages([{ role: 'assistant', mode: 'score', reply: s.opener, replyThai: s.openerThai, scores: null, feedback: '', corrected: '' }]);
+          setSessionScores([]);
+          setError('');
+        }
+
+        function changeScenario() {
+          window.speechSynthesis && window.speechSynthesis.cancel();
+          if (recRef.current) { try { recRef.current.abort(); } catch (e) {} }
+          setScenarioKey(null);
+          setMessages([]);
+        }
+
+        const STARTERS = scenarioKey ? ({
+          general: ['Hi, how are you today?', 'What do you do for work?', "Let's talk about my weekend."],
+          restaurant: ["I'd like to order the grilled salmon.", 'Do you have any vegetarian options?', 'Could I see the menu, please?'],
+          airport: ["Here's my passport and ticket.", 'Is my flight on time?', 'Where is gate 12?'],
+          interview: ["I'm currently working as a marketing assistant.", 'I have three years of experience in this field.', 'What are the next steps in the process?'],
+          hotel: ['Yes, I have a reservation under my name.', 'Could I get a room with a nice view?', 'What time is check-out?'],
+          shopping: ["I'm looking for a jacket.", 'Do you have this in a smaller size?', 'How much does this cost?'],
+        }[scenarioKey] || []) : [];
+
+        useEffect(() => {
+          if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }, [messages, loading]);
+
+        useEffect(() => {
+          return () => {
+            if (recRef.current) { try { recRef.current.abort(); } catch (e) {} }
+            window.speechSynthesis && window.speechSynthesis.cancel();
+          };
+        }, []);
+
+        // ค่าเฉลี่ยคะแนนตลอดเซสชัน — แสดงความคืบหน้าให้ผู้เรียนเห็นภาพรวม
+        const avgScores = sessionScores.length > 0 ? {
+          grammar: Math.round(sessionScores.reduce((s, x) => s + x.grammar, 0) / sessionScores.length),
+          fluency: Math.round(sessionScores.reduce((s, x) => s + x.fluency, 0) / sessionScores.length),
+          vocabulary: Math.round(sessionScores.reduce((s, x) => s + x.vocabulary, 0) / sessionScores.length),
+        } : null;
+
+        function sendMessage(text) {
+          const trimmed = (text ?? input).trim();
+          if (!trimmed || loading || !scenario) return;
+
+          const isThai = containsThai(trimmed);
+          // ข้อความไทยยังไม่รู้คำแปลอังกฤษจนกว่า AI จะตอบกลับมา — เก็บ text เดิมไว้แสดงระหว่างรอ
+          const userMsg = { role: 'user', text: trimmed, isThai, englishVersion: null };
+          const updated = [...messages, userMsg];
+          setMessages(updated);
+          setInput('');
+          setLoading(true);
+          setError('');
+
+          const apiMessages = updated.map((m) =>
+            m.role === 'user'
+              ? { role: 'user', content: m.text }
+              : { role: 'assistant', content: JSON.stringify({ reply: m.reply, replyThai: m.replyThai, scores: m.scores, feedback: m.feedback, corrected: m.corrected }) }
+          );
+
+          const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+
+          fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ messages: apiMessages, systemPrompt: buildSystemPrompt(scenario) }),
+          })
+            .then((res) => res.json())
+            .then((res) => {
+              setLoading(false);
+              if (res && res.success) {
+                try {
+                  let raw = res.text.replace(/```json|```/g, '').trim();
+                  const parsed = JSON.parse(raw);
+                  const mode = parsed.mode === 'translate' ? 'translate' : 'score';
+
+                  // ถ้าเป็นโหมดแปล (ผู้เรียนพิมพ์ไทย) — เติมคำแปลอังกฤษเข้าไปในข้อความของผู้เรียนที่ส่งไปแล้ว
+                  if (mode === 'translate' && parsed.englishVersion) {
+                    setMessages((prev) => prev.map((m, idx) =>
+                      idx === prev.length - 1 && m.role === 'user'
+                        ? { ...m, englishVersion: parsed.englishVersion }
+                        : m
+                    ));
+                  }
+
+                  const newMsg = {
+                    role: 'assistant',
+                    mode,
+                    reply: parsed.reply || '',
+                    replyThai: parsed.replyThai || '',
+                    scores: mode === 'score' ? (parsed.scores || null) : null,
+                    feedback: mode === 'score' ? (parsed.feedback || '') : '',
+                    corrected: mode === 'score' ? (parsed.corrected || '') : '',
+                  };
+                  setMessages((prev) => [...prev, newMsg]);
+                  if (newMsg.scores) {
+                    setSessionScores((prev) => [...prev, newMsg.scores]);
+                  }
+                  if (newMsg.reply) speak(newMsg.reply);
+                } catch (e) {
+                  setError('รูปแบบการตอบกลับจาก AI ไม่ถูกต้อง');
+                }
+              } else {
+                setError((res && res.error) || 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+              }
+            })
+            .catch((err) => {
+              setLoading(false);
+              setError('เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: ' + err.message);
+            });
+        }
+
+        function startListening() {
+          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (!SR) { setMicState('unsupported'); return; }
+          if (recRef.current) { try { recRef.current.abort(); } catch (e) {} }
+          window.speechSynthesis && window.speechSynthesis.cancel();
+
+          try {
+            const rec = new SR();
+            rec.lang = 'en-US';
+            rec.interimResults = false;
+            rec.maxAlternatives = 3;
+            recRef.current = rec;
+
+            rec.onstart = () => setMicState('listening');
+
+            rec.onresult = (e) => {
+              if (!e.results || !e.results[0]) return;
+              const alts = Array.from(e.results[0]).map((r) => r.transcript);
+              const spokenText = (alts[0] || '').trim();
+              if (spokenText) sendMessage(spokenText);
+            };
+
+            rec.onerror = (e) => {
+              if (e.error === 'not-allowed' || e.error === 'service-not-allowed') setMicState('denied');
+              else setMicState('idle');
+            };
+
+            rec.onend = () => setMicState((p) => (p === 'listening' ? 'idle' : p));
+
+            rec.start();
+          } catch (err) {
+            setMicState('unsupported');
+          }
+        }
+
+        function stopListening() {
+          if (recRef.current) recRef.current.stop();
+        }
+
+        // ยังไม่ได้เลือกสถานการณ์ → แสดงหน้า landing เต็มหน้าก่อน
+        if (!scenario) {
+          return <ScenarioLanding onSelect={startScenario} />;
+        }
+
+        return (
+          <div>
+            <ScenarioBar scenario={scenario} onChangeScenario={changeScenario} />
+
+            {avgScores && (
+              <div style={{
+                display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+                border: `1px solid ${COLORS.line}`, borderRadius: 16, background: '#fff',
+                padding: '18px 10px', marginBottom: 14,
+              }}>
+                <ScoreRing label="Grammar" value={avgScores.grammar} size={72} />
+                <ScoreRing label="Fluency" value={avgScores.fluency} size={72} />
+                <ScoreRing label="Vocabulary" value={avgScores.vocabulary} size={72} />
+              </div>
+            )}
+
+            <div ref={scrollRef} style={{
+              border: `1px solid ${COLORS.line}`, borderRadius: 16, background: COLORS.paperDark,
+              padding: 16, height: 400, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12,
+            }} className="sc-scroll">
+              {messages.map((m, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                  {m.role === 'user' ? (
+                    <div style={{ maxWidth: '78%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                      <div style={{
+                        background: COLORS.ink, color: COLORS.paper,
+                        borderRadius: '14px 14px 2px 14px', padding: '10px 14px', fontSize: 14.5,
+                      }}>
+                        {m.text}
+                      </div>
+                      {/* ข้อความไทย: แสดงคำแปลอังกฤษที่ AI แปลให้ (ส่งเข้าสนทนาจริงแล้ว) */}
+                      {m.isThai && m.englishVersion && (
+                        <div style={{
+                          fontSize: 12.5, color: COLORS.accent, background: COLORS.accentSoft,
+                          borderRadius: 8, padding: '5px 10px', fontWeight: 500,
+                        }}>
+                          🗣 "{m.englishVersion}"
+                        </div>
+                      )}
+                      {m.isThai && !m.englishVersion && (
+                        <div style={{ fontSize: 12, color: COLORS.inkSoft }}>กำลังแปล...</div>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{
+                      maxWidth: '85%', background: '#fff', border: `1px solid ${COLORS.line}`,
+                      borderRadius: '14px 14px 14px 2px', padding: '12px 14px',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className="sc-display" style={{ fontSize: 15.5, fontWeight: 600 }}>{m.reply}</span>
+                        {m.reply && <SpeakButton text={m.reply} size={13} onSpeak={speak} />}
+                      </div>
+                      {m.replyThai && <div style={{ fontSize: 13, color: COLORS.inkSoft, marginTop: 4 }}>{m.replyThai}</div>}
+
+                      {m.scores && (
+                        <div style={{ display: 'flex', gap: 14, marginTop: 10, paddingTop: 10, borderTop: `1px solid ${COLORS.line}` }}>
+                          <MiniScore label="Grammar" value={m.scores.grammar} />
+                          <MiniScore label="Fluency" value={m.scores.fluency} />
+                          <MiniScore label="Vocabulary" value={m.scores.vocabulary} />
+                        </div>
+                      )}
+
+                      {m.corrected && (
+                        <div style={{
+                          marginTop: 8, fontSize: 12.5, color: COLORS.ink, background: COLORS.mintSoft,
+                          borderRadius: 8, padding: '7px 10px',
+                        }}>
+                          ✓ Try: <b>{m.corrected}</b>
+                        </div>
+                      )}
+
+                      {m.feedback && (
+                        <div style={{
+                          marginTop: 6, fontSize: 12.5, color: '#8A2D5A', background: COLORS.accentSoft,
+                          borderRadius: 8, padding: '7px 10px',
+                        }}>
+                          💡 {m.feedback}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {loading && <div style={{ fontSize: 13, color: COLORS.inkSoft }}>Coach Alex is typing...</div>}
+              {error && <div style={{ fontSize: 13, color: '#C4453B' }}>{error}</div>}
+            </div>
+
+            {micState === 'denied' && (
+              <div style={{ marginTop: 10, fontSize: 12.5, color: '#C4453B' }}>
+                Microphone access was denied. Please allow it in your browser settings and try again.
+              </div>
+            )}
+            {micState === 'unsupported' && (
+              <div style={{ marginTop: 10, fontSize: 12.5, color: '#C4453B' }}>
+                This browser doesn't support voice input. Please type your message instead.
+              </div>
+            )}
+
+            {messages.length <= 1 && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                {STARTERS.map((s) => (
+                  <button type="button" key={s} onClick={() => sendMessage(s)} style={{
+                    fontSize: 12.5, padding: '6px 12px', borderRadius: 999,
+                    border: `1px solid ${COLORS.line}`, background: '#fff',
+                    color: COLORS.ink, cursor: 'pointer',
+                  }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 12, marginBottom: 4 }}>
+              พิมพ์อังกฤษเพื่อฝึกและรับคะแนน หรือพิมพ์ไทยเพื่อขอคำแปลเป็นอังกฤษ
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} style={{ display: 'flex', gap: 8 }}>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type in English or Thai..."
+                style={{
+                  flex: 1, padding: '10px 14px', borderRadius: 10,
+                  border: `1px solid ${COLORS.line}`, background: '#fff',
+                  fontSize: 14, outline: 'none', color: COLORS.ink,
+                }}
+              />
+              <button
+                type="button"
+                onClick={micState === 'listening' ? stopListening : startListening}
+                disabled={loading}
+                style={{
+                  padding: '10px 14px', borderRadius: 10, border: 'none',
+                  background: micState === 'listening' ? '#C4453B' : COLORS.accent,
+                  color: '#fff', fontWeight: 600, fontSize: 14,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1,
+                  animation: micState === 'listening' ? 'sc-pulse 1.4s infinite' : 'none',
+                }}
+              >
+                {micState === 'listening' ? '■' : '🎙'}
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  padding: '10px 18px', borderRadius: 10, border: 'none',
+                  background: COLORS.ink, color: '#fff', fontWeight: 600,
+                  fontSize: 14, cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.7 : 1,
+                }}
+              >
+                Send
+              </button>
+            </form>
+          </div>
+        );
+      }
+
+      function MiniScore({ label, value }) {
+        const color = value >= 80 ? COLORS.mint : value >= 60 ? COLORS.accent : '#C4453B';
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{label}</div>
+            <div className="sc-display" style={{ fontSize: 15, fontWeight: 700, color }}>{value}</div>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<SpeakCoach />);
+    </script>
+  </body>
 </html>
