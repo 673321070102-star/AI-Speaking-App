@@ -873,7 +873,7 @@ In both cases, keep "reply" short (1-2 sentences) and conversational, staying in
               : { role: 'assistant', content: JSON.stringify({ reply: m.reply, replyThai: m.replyThai, scores: m.scores, feedback: m.feedback, corrected: m.corrected }) }
           );
 
-          const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+          const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyziHEGut3mbq1xK0lwqV1KgoIz10pTOT6FhDXJUCCppVK8CJ_aok36lYn-KkT_xX6n/exec';
 
           fetch(APPS_SCRIPT_URL, {
             method: 'POST',
